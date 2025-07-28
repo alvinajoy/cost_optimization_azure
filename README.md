@@ -1,50 +1,98 @@
 # Azure Cost Optimization Archive Solution
 
-### Objective
-This project sets up a cost-efficient, serverless, archival solution on Microsoft Azure using Terraform. The architecture is designed to store and occasionally access billing or cost records while keeping infrastructure costs minimal. The system leverages Azure Functions for serverless compute and Azure Storage for long-term, low-cost data retention.
+## Objective
 
-### Architecture Overview
-Flow:
+This project sets up a **cost-efficient, serverless archival solution** on Microsoft Azure using Terraform. The architecture is designed to store and occasionally access billing or cost records while keeping infrastructure costs minimal. It leverages **Azure Functions** for serverless compute and **Azure Storage** for long-term, low-cost data retention.
 
+---
 
-### Components and Rationale
-1. Azure Storage (Hot/Cold/Archive Tiers)
-Why? Archiving is the core goal. Azure Storage is the most cost-effective way to store data in Archive or Cool tier.
+## Architecture Overview
 
-Benefit: Store large volumes of data with no compute cost unless retrieved.
+**Flow:**
 
-2. Azure Functions (Linux, Python, Consumption Plan)
-Why? Function Apps allow on-demand compute without always-on servers.
-
-Benefit: Pay only per execution, perfect for intermittent billing/archive jobs.
-
-3. Service Plan (SKU: Y1 - Free Tier)
-Why? This keeps costs minimal. Y1 allows one free Linux consumption plan per region.
-
-Benefit: No compute billing for small projects if within limits.
-
-4. Terraform IaC
-Why? Enables consistent, repeatable deployments across environments.
-
-Benefit: Full automation, version control, easy rollback or updates.
+<img width="731" height="320" alt="image" src="https://github.com/user-attachments/assets/6cb54d0e-e9de-412e-a3ac-5647bb68237b" />
 
 
-### Deployment Constraints
-1. The deployment could not be completed/tested due to the following issues:
 
-2. Azure App Service Plan quota exceeded (Only one free Y1 plan allowed per region)
+---
 
-3. Terraform backend errors from .tfstate.lock.info due to manual lock deletion
+## Components and Rationale
 
-4. Storage resource not found (likely due to partial creation or regional delay)
+### 1. Azure Blob Storage (Cold/Archive Tiers)
+- **Why:** Archiving is the core goal. Azure Storage provides the most cost-effective solution for storing data in Archive or Cool tiers.  
+- **Benefit:** Store large volumes of data with no compute cost unless retrieved.
 
-5. Despite these constraints, the Terraform configuration is complete and has been validated successfully.
+### 2. Azure Cosmos DB (Hot Tiers)
+- **Why:** Used for storing recent or frequently accessed records (hot data).  
+- **Benefit:** Provides low-latency access with flexible querying options
 
-### Benefits
-1. Extremely Low Cost: No idle VMs, no compute bills when idle
+### 3. Azure Functions (Linux, Python, Consumption Plan)
+- **Why:** Function Apps enable on-demand compute without always-on servers.  
+- **Benefit:** Pay only per execution, ideal for intermittent billing/archive jobs.
 
-2. Scalable: Serverless model allows scale to zero
+### 4. Service Plan (SKU: Y1 - Free Tier)
+- **Why:** Keeps compute costs minimal. Y1 allows one free Linux consumption plan per region.  
+- **Benefit:** No compute billing for small-scale projects within the quota.
 
-3. Secure: Storage access is private; app settings are secured
+### 5. Terraform (Infrastructure as Code)
+- **Why:** Enables consistent, repeatable, and automated deployments.  
+- **Benefit:** Full automation, version control, easy rollback, and reproducibility across environments.
 
-4. Maintainable: Fully managed by Infrastructure-as-Code (IaC)
+---
+
+## Deployment Constraints
+
+The deployment could not be fully completed due to the following constraints:
+
+- Azure App Service Plan quota exceeded (Only one free Y1 plan allowed per region)
+
+> Despite these issues, the Terraform configuration is complete, valid, and tested with `terraform validate`.
+
+---
+
+## Benefits
+
+- **Extremely Low Cost:** No idle VMs; only pay per use
+- **Scalable:** Automatically scales to zero when idle
+- **Secure:** Storage access is private; environment variables and function secrets are secured
+- **Maintainable:** Fully managed and reproducible through Terraform IaC
+
+---
+
+## Terraform Files
+
+- `main.tf` – Declares all resources
+- `variables.tf` – Input variable definitions
+- `outputs.tf` – Outputs for reference (if applicable)
+- `provider.tf` – Azure provider configuration
+
+---
+
+## How to Deploy
+
+### Prerequisites
+
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) installed
+- Azure CLI logged in (`az login`)
+- An Azure subscription with appropriate permissions
+
+---
+
+### Steps
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/your-repo-name.git
+   cd your-repo-name
+2. **Initialize Terraform:**
+   ```bash
+    terraform init
+3. **Validate the configuration:**
+    ```bash
+    terraform validate
+4. **Preview the execution plan:**
+   ```bash
+    terraform plan
+5. **Apply the configuration:**
+   ```bash
+    terraform apply
